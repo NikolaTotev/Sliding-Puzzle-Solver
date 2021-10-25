@@ -22,9 +22,17 @@ namespace Sliding_Puzzle_Solver_CLI
             CalcManhattanDistance();
         }
 
-        public void CalcManhattanDistance(Point currentPosition, Point desiredPosition)
+        public PuzzleElement(int elementNumber, Point currentPosition, Point desiredPosition, int manhattanDistance)
         {
-            ManhattanDistance = Math.Abs(currentPosition.X - desiredPosition.X) + Math.Abs(currentPosition.Y - desiredPosition.Y);
+            ElementNumber = elementNumber;
+            CurrentPosition = currentPosition;
+            DesiredPosition = desiredPosition;
+            ManhattanDistance = manhattanDistance;
+        }
+
+        public void CalcManhattanDistance()
+        {
+            ManhattanDistance = Math.Abs(CurrentPosition.X - DesiredPosition.X) + Math.Abs(CurrentPosition.Y - DesiredPosition.Y);
         }
     }
 }

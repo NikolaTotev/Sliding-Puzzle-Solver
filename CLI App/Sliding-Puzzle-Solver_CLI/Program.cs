@@ -44,10 +44,11 @@ namespace Sliding_Puzzle_Solver_CLI
         static void Main(string[] args)
         {
             List<List<PuzzleElement>> puzzleMatrix = new List<List<PuzzleElement>>();
-            Dictionary<int, string> moves = new Dictionary<int, string>();
+            List<Movable> moves = new List<Movable>();
             Dictionary<int, Point> targetNumberPosition = new Dictionary<int, Point>();
             Dictionary<int, PuzzleElement> puzzleList = new Dictionary<int, PuzzleElement>();
             int puzzleSize;
+            PuzzleConfiguration rootConfiguration;
 
             Console.WriteLine($"=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
             Console.WriteLine($"Welcome to AutoSolve. Begin by entering the puzzle matrix to be solved!");
@@ -77,20 +78,7 @@ namespace Sliding_Puzzle_Solver_CLI
             }
 
 
-            if (puzzleSize == 3)
-            {
-                targetNumberPosition = GenTargetPositionList(ThreeXThreeMatrix);
-            }
-
-            if (puzzleSize == 4)
-            {
-                targetNumberPosition = GenTargetPositionList(FourXFourMatrix);
-            }
-
-            if (puzzleSize == 5)
-            {
-                targetNumberPosition = GenTargetPositionList(FiveXFiveMatrix);
-            }
+            targetNumberPosition = GenTargetPositionList(SelectTargetMatrix(puzzleSize));
 
 
             for (int j = 0; j < puzzleSize; j++)
@@ -129,12 +117,26 @@ namespace Sliding_Puzzle_Solver_CLI
                 puzzleMatrix.Add(rowToAdd);
             }
 
+            Console.WriteLine();
+            Console.WriteLine($"=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
             Console.WriteLine($"The matrix that you entered is:");
             PrintMatrix(puzzleMatrix);
 
             Console.WriteLine();
             Console.WriteLine("The target matrix is:");
-            PrintMatrix();
+            PrintMatrix(SelectTargetMatrix(puzzleSize));
+            Console.WriteLine($"=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
+
+            rootConfiguration = new PuzzleConfiguration(puzzleMatrix, puzzleList, moves);
+
+            rootConfiguration.IDATraversal(rootConfiguration.hnCoef);
+
+            Console.WriteLine();
+            Console.WriteLine("Moves:");
+            foreach (Movable movable in moves)
+            {
+                Console.WriteLine($"Element {movable.PieceNumber} moved {movable.Direction}");
+            }
         }
 
         public static Dictionary<int, Point> GenTargetPositionList(List<List<int>> templateMatrix)
@@ -159,22 +161,37 @@ namespace Sliding_Puzzle_Solver_CLI
             {
                 for (int j = 0; j < matrixToPrint[i].Count; j++)
                 {
-                    Console.Write(matrixToPrint[i][j].ElementNumber);
+                    Console.Write($"{matrixToPrint[i][j].ElementNumber} ");
                 }
                 Console.WriteLine();
             }
         }
 
-        public void PrintMatrix(List<List<int>> matrixToPrint)
+        public static void PrintMatrix(List<List<int>> matrixToPrint)
         {
             for (int i = 0; i < matrixToPrint.Count; i++)
             {
                 for (int j = 0; j < matrixToPrint[i].Count; j++)
                 {
-                    Console.Write(matrixToPrint[i][j]);
+                    Console.Write($"{matrixToPrint[i][j]} ");
                 }
                 Console.WriteLine();
             }
+        }
+
+        public static List<List<int>> SelectTargetMatrix(int puzzleSize)
+        {
+            if (puzzleSize == 3)
+            {
+                return ThreeXThreeMatrix;
+            }
+
+            if (puzzleSize == 4)
+            {
+                return FourXFourMatrix;
+            }
+
+            return FiveXFiveMatrix;
         }
     }
 }
