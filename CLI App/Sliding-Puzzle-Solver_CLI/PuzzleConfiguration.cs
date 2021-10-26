@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Sliding_Puzzle_Solver_CLI
 {
- 
+
 
     public enum MoveDirection { Up, Down, Left, Right }
     public struct Movable
@@ -27,9 +27,14 @@ namespace Sliding_Puzzle_Solver_CLI
         private List<List<PuzzleElement>> m_ConfigurationMatrix;
         private Dictionary<int, PuzzleElement> m_ConfigurationList;
         private List<Movable> m_Moves;
+        public int currentThreshold;
+        public int currentChildThreshold;
+        public int newCurrentMinChildThreshold = -1;
+        public int currentDepth = 0;
         public int hnCoef;
         private List<Movable> m_MovableElements = new List<Movable>();
         private bool hasBeenVisited = false;
+        public bool isSolved = false;
         public PuzzleConfiguration(List<List<PuzzleElement>> inputMatrixConfig, Dictionary<int, PuzzleElement> inputListConfig, List<Movable> moves)
         {
             //Deep copy code for the Puzzle Matrix
@@ -129,21 +134,24 @@ namespace Sliding_Puzzle_Solver_CLI
             hnCoef = 0;
             foreach (var element in m_ConfigurationList)
             {
-
                 element.Value.CalcManhattanDistance(); //This can be optimized to calculate ManhattanDist only when a piece moves.
 
                 hnCoef += element.Value.ManhattanDistance;
-                Console.WriteLine($"{element.Value.ElementNumber} -> hn = {element.Value.ManhattanDistance} || New total: {hnCoef}");
+                Console.WriteLine(
+                    $"{element.Value.ElementNumber} -> hn = {element.Value.ManhattanDistance} || New total: {hnCoef}");
             }
+
+            currentThreshold = hnCoef;
         }
 
         public void FindMovable()
         {
             Console.WriteLine();
             Console.WriteLine("======= Finding movable =======");
-            bool canMoveLeft = m_ConfigurationList[0].CurrentPosition.X > 1;
+            bool canMoveLeft = m_ConfigurationList[0].CurrentPosition.X >= 1;
+            int number = m_ConfigurationList[0].ElementNumber;
             bool canMoveRight = m_ConfigurationList[0].CurrentPosition.X < 2;
-            bool canMoveUp = m_ConfigurationList[0].CurrentPosition.Y > 1;
+            bool canMoveUp = m_ConfigurationList[0].CurrentPosition.Y >= 1;
             bool canMoveDown = m_ConfigurationList[0].CurrentPosition.Y < 2;
 
             if (canMoveLeft)
@@ -191,7 +199,7 @@ namespace Sliding_Puzzle_Solver_CLI
                 newChildConfiguration.Move(movableElement);
                 newChildConfiguration.CalcHnCoef();
                 m_ChidConfigurations.Add(newChildConfiguration);
-                if (newChildConfiguration.hnCoef == 0)
+                if (newChildConfiguration.hnCoef == 0) //Move this before adding?
                 {
                     return;
                 }
@@ -199,30 +207,9 @@ namespace Sliding_Puzzle_Solver_CLI
             hasBeenVisited = true;
         }
 
-        public void IDATraversal(int currentThreshold)
+        public void IDATraversal(PuzzleConfiguration rootConfig)
         {
-            Console.WriteLine();
-            Console.WriteLine($">> Current Threshold {currentThreshold}");
-            if (hnCoef == 0)
-            {
-                return;
-            }
-            FindMovable();
-            if (!hasBeenVisited)
-            {
-                GenerateChildConfigurations();
-            }
-            foreach (PuzzleConfiguration child in m_ChidConfigurations)
-            {
-                if (child.hnCoef <= currentThreshold)
-                {
-                    child.IDATraversal(currentThreshold);
-                }
-                else
-                {
-                    return;
-                }
-            }
+           
         }
 
         public static void PrintMatrix(List<List<PuzzleElement>> matrixToPrint)

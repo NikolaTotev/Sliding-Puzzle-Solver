@@ -32,7 +32,10 @@ namespace Sliding_Puzzle_Solver_CLI
 
         public void CalcManhattanDistance()
         {
-            ManhattanDistance = Math.Abs(CurrentPosition.X - DesiredPosition.X) + Math.Abs(CurrentPosition.Y - DesiredPosition.Y);
+            if (ElementNumber != 0)
+            {
+                ManhattanDistance = Math.Abs(CurrentPosition.X - DesiredPosition.X) + Math.Abs(CurrentPosition.Y - DesiredPosition.Y);
+            }
         }
     }
 }

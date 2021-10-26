@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -47,6 +48,7 @@ namespace Sliding_Puzzle_Solver_CLI
             List<Movable> moves = new List<Movable>();
             Dictionary<int, Point> targetNumberPosition = new Dictionary<int, Point>();
             Dictionary<int, PuzzleElement> puzzleList = new Dictionary<int, PuzzleElement>();
+            Stack<PuzzleElement> nodesToVisit = new Stack<PuzzleElement>();
             int puzzleSize;
             PuzzleConfiguration rootConfiguration;
 
@@ -129,7 +131,7 @@ namespace Sliding_Puzzle_Solver_CLI
 
             rootConfiguration = new PuzzleConfiguration(puzzleMatrix, puzzleList, moves);
 
-            rootConfiguration.IDATraversal(rootConfiguration.hnCoef);
+         
 
             Console.WriteLine();
             Console.WriteLine("Moves:");
@@ -137,7 +139,10 @@ namespace Sliding_Puzzle_Solver_CLI
             {
                 Console.WriteLine($"Element {movable.PieceNumber} moved {movable.Direction}");
             }
+
+
         }
+
 
         public static Dictionary<int, Point> GenTargetPositionList(List<List<int>> templateMatrix)
         {
