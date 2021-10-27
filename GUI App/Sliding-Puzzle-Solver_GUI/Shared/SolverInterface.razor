@@ -1,0 +1,133 @@
+﻿@using Sliding_Puzzle_Solver_GUI.PuzzleLogic
+@using System.Drawing
+
+
+<h3> 3x3 Auto Solver</h3>
+
+
+<section class="input-grid">
+    @if (validMatrix)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                <div>
+                    <p>@(puzzleMatrix[i][j].ElementNumber)</p>
+                </div>
+            }
+        }
+    }
+    else
+    {
+        <p>Please enter a puzzle to solve</p>
+    }
+
+</section>
+
+<section class="solver-controls">
+    <p>Input the puzzle matrix in the format:</p>
+    <p>1 2 3, 4 5 6, 7 8 0</p>
+    <p>Where 0 indicates the empty spot in the puzzle.</p>
+    <input id="matrixRowInput" type="text" @bind="matrixData" />
+    <input id="Button1" type="button" value="button" @onclick="@(() => StartSolving())" />
+</section>
+
+<section class="output-grid">
+    @*@if (!validMatrix)
+    {
+        <p>Nothing to show yet.</p>
+    }
+    else
+    {
+        if (isSolving)
+        {
+            <p>Preparing solution...</p>
+        }
+        else
+        {
+            @foreach (Movable step in solver.Moves)
+            {
+                <div class="step">
+                    <p>@step.PieceNumber</p>
+                    <p>@step.Direction</p>
+                </div>
+            }
+        }
+    }*@
+
+
+</section>
+
+
+@code {
+
+    private static List<List<int>> ThreeXThreeMatrix = new()
+    {
+            new List<int>() { 1, 2, 3 },
+            new List<int>() { 4, 5, 6 },
+            new List<int>() { 7, 8, 0 }
+        };
+
+    private static List<List<PuzzleElement>> puzzleMatrix = new List<List<PuzzleElement>>();
+    private Dictionary<int, Point> targetNumberPosition;
+    private static Dictionary<int, PuzzleElement> puzzleList;
+    private static int puzzleSize = 0;
+    private string matrixData;
+    public PuzzleSolver solver;
+    bool isSolving;
+    bool validMatrix = false;
+
+    public void StartSolving()
+    {
+        Console.WriteLine("DERP DERP PRESSSED");
+        puzzleList = new Dictionary<int, PuzzleElement>();
+        List<string> rows = matrixData.Split(',').ToList();
+        targetNumberPosition = GenTargetPositionList(SelectTargetMatrix());
+        for (int j = 0; j < 3; j++)
+        {
+            List<int> numbers = rows[j].Split(' ').Select(int.Parse).ToList();
+            List<PuzzleElement> rowToAdd = new List<PuzzleElement>();
+
+            for (int i = 0; i < numbers.Count; i++)
+            {
+                Point currentCoord = new Point(i, j);
+                PuzzleElement elementToAdd =
+                    new PuzzleElement(numbers[i], currentCoord, targetNumberPosition[numbers[i]]);
+                rowToAdd.Add(elementToAdd);
+                puzzleList.Add(numbers[i], elementToAdd);
+            }
+            puzzleMatrix.Add(rowToAdd);
+        }
+
+        validMatrix = true;
+        StateHasChanged();
+
+        //isSolving = true;
+        //Task task = Task<bool>.Factory.StartNew(() => solver.Solve());
+        //task.Wait();
+        //isSolving = task.IsCompleted;
+    }
+
+    public static Dictionary<int, Point> GenTargetPositionList(List<List<int>> templateMatrix)
+    {
+        Dictionary<int, Point> targetPositionList = new Dictionary<int, Point>();
+
+        for (int i = 0; i < templateMatrix.Count; i++)
+        {
+            for (int j = 0; j < templateMatrix[i].Count; j++)
+            {
+                Point currentCoord = new Point(j, i);
+                targetPositionList.Add(templateMatrix[i][j], currentCoord);
+            }
+        }
+
+        return targetPositionList;
+    }
+
+    public static List<List<int>> SelectTargetMatrix()
+    {
+        return ThreeXThreeMatrix;
+    }
+
+}
