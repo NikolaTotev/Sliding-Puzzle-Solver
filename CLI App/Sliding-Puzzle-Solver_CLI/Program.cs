@@ -129,20 +129,26 @@ namespace Sliding_Puzzle_Solver_CLI
             PrintMatrix(SelectTargetMatrix(puzzleSize));
             Console.WriteLine($"=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
 
-            rootConfiguration = new PuzzleConfiguration(puzzleMatrix, puzzleList, moves);
-
-         
+            rootConfiguration = new PuzzleConfiguration(puzzleMatrix, puzzleList, new Movable(0, MoveDirection.None), false, 0);
+            rootConfiguration.currentThreshold = rootConfiguration.hnCoef;
+            while (!rootConfiguration.isSolved) 
+            {
+                Console.WriteLine(rootConfiguration.currentThreshold);
+                rootConfiguration.IDATraversal(rootConfiguration);
+                rootConfiguration.currentThreshold += 2;
+            }
 
             Console.WriteLine();
             Console.WriteLine("Moves:");
-            foreach (Movable movable in moves)
+
+
+            foreach (Movable rootConfigurationStep in rootConfiguration.Steps)
             {
-                Console.WriteLine($"Element {movable.PieceNumber} moved {movable.Direction}");
+                Console.WriteLine($"Move {rootConfigurationStep.PieceNumber} {rootConfigurationStep.Direction}");
             }
 
 
         }
-
 
         public static Dictionary<int, Point> GenTargetPositionList(List<List<int>> templateMatrix)
         {
