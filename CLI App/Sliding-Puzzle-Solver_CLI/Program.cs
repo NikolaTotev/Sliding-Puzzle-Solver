@@ -129,20 +129,23 @@ namespace Sliding_Puzzle_Solver_CLI
             PrintMatrix(SelectTargetMatrix(puzzleSize));
             Console.WriteLine($"=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
 
-            rootConfiguration = new PuzzleConfiguration(puzzleMatrix, puzzleList, new Movable(0, MoveDirection.None), false, 0);
-            rootConfiguration.currentThreshold = rootConfiguration.hnCoef;
-            while (!rootConfiguration.isSolved) 
-            {
-                Console.WriteLine(rootConfiguration.currentThreshold);
-                rootConfiguration.IDATraversal(rootConfiguration);
-                rootConfiguration.currentThreshold += 2;
-            }
+            //rootConfiguration = new PuzzleConfiguration(puzzleMatrix, puzzleList, new Movable(0, MoveDirection.None), false, 0);
+            //rootConfiguration.m_CurrentThreshold = rootConfiguration.hnCoef;
+            //while (!rootConfiguration.isSolved) 
+            //{
+            //    Console.WriteLine(rootConfiguration.m_CurrentThreshold);
+            //    rootConfiguration.IDATraversal(rootConfiguration);
+            //    rootConfiguration.m_CurrentThreshold += 2;
+            //}
+
+            PuzzleSolver solver = new PuzzleSolver(puzzleSize, puzzleMatrix, puzzleList);
+            solver.Solve();
 
             Console.WriteLine();
             Console.WriteLine("Moves:");
 
 
-            foreach (Movable rootConfigurationStep in rootConfiguration.Steps)
+            foreach (Movable rootConfigurationStep in solver.Moves)
             {
                 Console.WriteLine($"Move {rootConfigurationStep.PieceNumber} {rootConfigurationStep.Direction}");
             }

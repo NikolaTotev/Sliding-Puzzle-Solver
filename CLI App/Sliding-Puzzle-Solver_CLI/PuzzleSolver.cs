@@ -11,21 +11,24 @@ namespace Sliding_Puzzle_Solver_CLI
     {
         private int m_PuzzleSize;
         private List<List<PuzzleElement>> m_ConfigurationMatrix;
-        private int[,] m_ParentMatrix;
         private Dictionary<int, PuzzleElement> m_ConfigurationList;
-        private List<Movable> m_MovableElements = new List<Movable>();
-        private Movable m_ResponsibleMove;
+        
+        public Stack<Movable> Moves
+        {
+            get;
+        }
 
-        public int currentThreshold { get; set; }
+        public int m_CurrentThreshold { get; set; }
         private int m_CurrentDepth = 0;
         private int m_HnCoef = 0;
+        private bool m_IsSolved = false;
         public PuzzleSolver(int puzzleSize, List<List<PuzzleElement>> configurationMatrix, Dictionary<int, PuzzleElement> configurationList)
         {
             m_PuzzleSize = puzzleSize;
             m_ConfigurationMatrix = configurationMatrix;
             m_ConfigurationList = configurationList;
-            currentThreshold = 0;
-            m_ParentMatrix = new int[puzzleSize,puzzleSize];
+            m_CurrentThreshold = 0;
+            Moves = new Stack<Movable>();
 
             //Deep copy code for the Puzzle Matrix
             m_ConfigurationMatrix = new List<List<PuzzleElement>>();
@@ -52,31 +55,92 @@ namespace Sliding_Puzzle_Solver_CLI
                     puzzleElement.Value.ManhattanDistance);
                 m_ConfigurationList.Add(puzzleElement.Key, newElement);
             }
+
+            m_CurrentThreshold = CalcHnCoef() + 0;
         }
 
         //Calculates the Manhattan Distance for the current configuration.
         //This should be called before IDA* start and after every move.
         //This is not an optimized calculation!
-        public void CalcHnCoef()
+        public int CalcHnCoef()
         {
             // Console.WriteLine();
             // Console.WriteLine("======== Recalculating Hn ========");
-            m_HnCoef = 0;
+            int hnCoef = 0;
             foreach (var element in m_ConfigurationList)
             {
                 element.Value.CalcManhattanDistance(); //This can be optimized to calculate ManhattanDist only when a piece moves.
 
-                m_HnCoef += element.Value.ManhattanDistance;
+                hnCoef += element.Value.ManhattanDistance;
                 //Console.WriteLine(
                 //$"{element.Value.ElementNumber} -> hn = {element.Value.ManhattanDistance} || New total: {hnCoef}");
             }
 
-            currentThreshold = m_HnCoef;
+           return hnCoef;
         }
 
 
-        public void FindMovable()
+        public void Solve()
         {
+            while (!m_IsSolved)
+            {
+                Console.WriteLine(m_CurrentThreshold);
+                Search(0);
+                m_CurrentThreshold += 2;
+                
+            }
+        }
+
+        private void Search(int currentDepth)
+        {
+            List<Movable> movables = FindMovable();
+            int[,] parentMatrix;
+            foreach (Movable movableElement in movables)
+            {
+
+                parentMatrix = SaveParentMatrix();
+
+                Move(false, movableElement);
+
+                if (WillLoop(parentMatrix))
+                {
+                    Move(true, movableElement);
+                }
+                else
+                {
+                    int currentHnCoef = CalcHnCoef();
+                    
+                    if (currentHnCoef + currentDepth <= m_CurrentThreshold)
+                    {
+                        if (currentHnCoef == 0)
+                        {
+                            m_IsSolved = true;
+                            Moves.Push(movableElement);
+                            return;
+                        }
+
+                        
+                        Search(currentDepth+1);
+                        
+                        if (m_IsSolved)
+                        {
+                            Moves.Push(movableElement);
+                            return;
+                        }
+                        Move(true, movableElement);
+                    }
+                    else
+                    {
+                        Move(true, movableElement);
+                    }
+                }
+            }
+        }
+
+        public List<Movable> FindMovable()
+        {
+            List<Movable> movables = new List<Movable>();
+
             //Console.WriteLine();
             //Console.WriteLine("======= Finding movable =======");
             bool canMoveLeft = m_ConfigurationList[0].CurrentPosition.X >= 1;
@@ -90,7 +154,7 @@ namespace Sliding_Puzzle_Solver_CLI
                 //Console.WriteLine("Left movement possible.");
                 int movableYCoord = m_ConfigurationList[0].CurrentPosition.X - 1;
                 int movableXCoord = m_ConfigurationList[0].CurrentPosition.Y;
-                m_MovableElements.Add(new Movable(m_ConfigurationMatrix[movableXCoord][movableYCoord].ElementNumber, MoveDirection.Right));
+                movables.Add(new Movable(m_ConfigurationMatrix[movableXCoord][movableYCoord].ElementNumber, MoveDirection.Right));
             }
 
             if (canMoveRight)
@@ -98,7 +162,7 @@ namespace Sliding_Puzzle_Solver_CLI
                 //Console.WriteLine("Right movement possible.");
                 int movableYCoord = m_ConfigurationList[0].CurrentPosition.X + 1;
                 int movableXCoord = m_ConfigurationList[0].CurrentPosition.Y;
-                m_MovableElements.Add(new Movable(m_ConfigurationMatrix[movableXCoord][movableYCoord].ElementNumber, MoveDirection.Left));
+                movables.Add(new Movable(m_ConfigurationMatrix[movableXCoord][movableYCoord].ElementNumber, MoveDirection.Left));
             }
 
             if (canMoveUp)
@@ -106,7 +170,7 @@ namespace Sliding_Puzzle_Solver_CLI
                 //Console.WriteLine("Up movement possible.");
                 int movableYCoord = m_ConfigurationList[0].CurrentPosition.X;
                 int movableXCoord = m_ConfigurationList[0].CurrentPosition.Y - 1;
-                m_MovableElements.Add(new Movable(m_ConfigurationMatrix[movableXCoord][movableYCoord].ElementNumber, MoveDirection.Down));
+                movables.Add(new Movable(m_ConfigurationMatrix[movableXCoord][movableYCoord].ElementNumber, MoveDirection.Down));
             }
 
             if (canMoveDown)
@@ -114,17 +178,19 @@ namespace Sliding_Puzzle_Solver_CLI
                 //Console.WriteLine("Down movement possible.");
                 int movableYCoord = m_ConfigurationList[0].CurrentPosition.X;
                 int movableXCoord = m_ConfigurationList[0].CurrentPosition.Y + 1;
-                m_MovableElements.Add(new Movable(m_ConfigurationMatrix[movableXCoord][movableYCoord].ElementNumber, MoveDirection.Up));
+                movables.Add(new Movable(m_ConfigurationMatrix[movableXCoord][movableYCoord].ElementNumber, MoveDirection.Up));
             }
+
+            return movables;
         }
 
 
-        private void Move(bool reverse)
+        private void Move(bool reverse, Movable responsibleMove)
         {
             MoveDirection direction;
             if (reverse)
             {
-                switch (m_ResponsibleMove.Direction)
+                switch (responsibleMove.Direction)
                 {
                     case MoveDirection.Up:
                         direction = MoveDirection.Down;
@@ -148,69 +214,72 @@ namespace Sliding_Puzzle_Solver_CLI
             }
             else
             {
-                direction = m_ResponsibleMove.Direction;
+                direction = responsibleMove.Direction;
             }
 
-            PuzzleElement elementToMove = m_ConfigurationList[m_ResponsibleMove.PieceNumber];
+            PuzzleElement elementToMove = m_ConfigurationList[responsibleMove.PieceNumber];
             Point elementCoords = elementToMove.CurrentPosition;
             Point zeroCoords = m_ConfigurationList[0].CurrentPosition;
 
             switch (direction)
             {
                 case MoveDirection.Up:
-                    //Console.WriteLine($"Moving {m_ResponsibleMove.PieceNumber} UP");
+                    //Console.WriteLine($"Moving {responsibleMove.PieceNumber} UP");
                     m_ConfigurationMatrix[elementCoords.Y][elementCoords.X] =
                              m_ConfigurationMatrix[zeroCoords.Y][zeroCoords.X];
                     m_ConfigurationMatrix[zeroCoords.Y][zeroCoords.X] = elementToMove;
 
-                    m_ConfigurationList[m_ResponsibleMove.PieceNumber].CurrentPosition.Y -= 1;
+                    m_ConfigurationList[responsibleMove.PieceNumber].CurrentPosition.Y -= 1;
                     m_ConfigurationList[0].CurrentPosition.Y += 1;
                     break;
                 case MoveDirection.Down:
-                    //Console.WriteLine($"Moving {m_ResponsibleMove.PieceNumber} DOWN");
+                    //Console.WriteLine($"Moving {responsibleMove.PieceNumber} DOWN");
                     m_ConfigurationMatrix[elementCoords.Y][elementCoords.X] =
                         m_ConfigurationMatrix[zeroCoords.Y][zeroCoords.X];
                     m_ConfigurationMatrix[zeroCoords.Y][zeroCoords.X] = elementToMove;
 
-                    m_ConfigurationList[m_ResponsibleMove.PieceNumber].CurrentPosition.Y += 1;
+                    m_ConfigurationList[responsibleMove.PieceNumber].CurrentPosition.Y += 1;
                     m_ConfigurationList[0].CurrentPosition.Y -= 1;
                     break;
                 case MoveDirection.Left:
-                    //Console.WriteLine($"Moving {m_ResponsibleMove.PieceNumber} LEFT");
+                    //Console.WriteLine($"Moving {responsibleMove.PieceNumber} LEFT");
                     m_ConfigurationMatrix[elementCoords.Y][elementCoords.X] =
                         m_ConfigurationMatrix[zeroCoords.Y][zeroCoords.X];
                     m_ConfigurationMatrix[zeroCoords.Y][zeroCoords.X] = elementToMove;
 
-                    m_ConfigurationList[m_ResponsibleMove.PieceNumber].CurrentPosition.X -= 1;
+                    m_ConfigurationList[responsibleMove.PieceNumber].CurrentPosition.X -= 1;
                     m_ConfigurationList[0].CurrentPosition.X += 1;
                     break;
                 case MoveDirection.Right:
-                    //Console.WriteLine($"Moving {m_ResponsibleMove.PieceNumber} RIGHT");
+                    //Console.WriteLine($"Moving {responsibleMove.PieceNumber} RIGHT");
                     m_ConfigurationMatrix[elementCoords.Y][elementCoords.X] =
                         m_ConfigurationMatrix[zeroCoords.Y][zeroCoords.X];
                     m_ConfigurationMatrix[zeroCoords.Y][zeroCoords.X] = elementToMove;
 
-                    m_ConfigurationList[m_ResponsibleMove.PieceNumber].CurrentPosition.X += 1;
+                    m_ConfigurationList[responsibleMove.PieceNumber].CurrentPosition.X += 1;
                     m_ConfigurationList[0].CurrentPosition.X -= 1;
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(m_ResponsibleMove.Direction), m_ResponsibleMove.Direction, null);
+                    throw new ArgumentOutOfRangeException(nameof(responsibleMove.Direction), responsibleMove.Direction, null);
             }
         }
 
-        private void SaveParentMatrix()
+        private int [,] SaveParentMatrix()
         {
+            int[,] newParent = new int[m_PuzzleSize, m_PuzzleSize];
             for (int i = 0; i < m_ConfigurationMatrix.Count; i++)
             {
                 for (int j = 0; j < m_ConfigurationMatrix[i].Count; j++)
                 {
-                    m_ParentMatrix[i, j] = m_ConfigurationMatrix[i][j].ElementNumber;
+                    newParent[i, j] = m_ConfigurationMatrix[i][j].ElementNumber;
                 }
 
             }
+
+            return newParent;
         }
 
-        bool WillLoop()
+        bool WillLoop(int [,] m_ParentMatrix)
         {
             for (int i = 0; i < m_ConfigurationMatrix.Count; i++)
             {
@@ -223,7 +292,6 @@ namespace Sliding_Puzzle_Solver_CLI
                 }
 
             }
-
             return true;
         }
     }
