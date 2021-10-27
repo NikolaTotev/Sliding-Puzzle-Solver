@@ -124,8 +124,7 @@ namespace Sliding_Puzzle_Solver_CLI
             }
         }
 
-
-
+        
         public void CalcHnCoef()
         {
            // Console.WriteLine();
