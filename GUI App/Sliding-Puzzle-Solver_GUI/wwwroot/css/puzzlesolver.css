@@ -1,0 +1,32 @@
+﻿@import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
+
+/*body {
+    background: rgb(19, 19, 19);
+    color: #fff;
+    font-family: 'Noto Sans', sans-serif;
+}*/
+
+.puzzle-element {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #353535;
+    font-size: 1rem;
+    color: #fff;
+
+}
+
+.puzzle-container {
+    width: 50%;
+}
+.puzzle-grid {
+    
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(3, minmax(50px, 0.1rem));
+}
+.card:hover {
+    box-shadow: rgba(2, 8, 20, 0.1) 0px 0.35em 1.175em, rgba(2, 8, 20, 0.08) 0px 0.175em 0.5em;
+    transform: translateY(-3px) scale(1.1);
+}

@@ -1,63 +1,121 @@
 ﻿@using Sliding_Puzzle_Solver_GUI.PuzzleLogic
 @using System.Drawing
 
-
+<head>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+          rel="stylesheet">
+</head>
 <h3> 3x3 Auto Solver</h3>
 
+<div class="root-grid">
 
-<section class="input-grid">
-    @if (validMatrix)
-    {
-        for (int i = 0; i < 3; i++)
-        {
-            for (int j = 0; j < 3; j++)
+    <div class="puzzle-container">
+        <div class="puzzle-grid">
+
+            @if (validMatrix)
             {
-                <div>
-                    <p>@(puzzleMatrix[i][j].ElementNumber)</p>
-                </div>
+                for (int i = 0; i < 3; i++)
+                {
+                    for (int j = 0; j < 3; j++)
+                    {
+                        <div>
+                            <div class="puzzle-element">@(puzzleMatrix[i][j].ElementNumber)</div>
+                        </div>
+                    }
+                }
             }
-        }
-    }
-    else
-    {
-        <p>Please enter a puzzle to solve</p>
-    }
+            else
+            {
+                <p>Please enter a puzzle to solve</p>
+            }
 
-</section>
+        </div>
 
-<section class="solver-controls">
-    <p>Input the puzzle matrix in the format:</p>
-    <p>1 2 3, 4 5 6, 7 8 0</p>
-    <p>Where 0 indicates the empty spot in the puzzle.</p>
-    <input id="matrixRowInput" type="text" @bind="matrixData" />
-    <input id="Button1" type="button" value="button" @onclick="@(() => StartSolving())" />
-</section>
+    </div>
 
-<section class="output-grid">
-    @*@if (!validMatrix)
-    {
-        <p>Nothing to show yet.</p>
-    }
-    else
-    {
-        if (isSolving)
+    <div class="solver-controls">
+        <p>Input the puzzle matrix in the format:</p>
+        <p>1 2 3, 4 5 6, 7 8 0</p>
+        <p>Where 0 indicates the empty spot in the puzzle.</p>
+        <input id="matrixRowInput" type="text" @bind="matrixData" />
+        <input id="Button1" type="button" value="button" @onclick="@(() => StartSolving())" />
+    </div>
+
+
+
+    <div class="step-container">
+
+        @if (isSolving)
         {
             <p>Preparing solution...</p>
         }
-        else
+        else if (!isSolving && solutionReady)
         {
             @foreach (Movable step in solver.Moves)
             {
-                <div class="step">
-                    <p>@step.PieceNumber</p>
-                    <p>@step.Direction</p>
-                </div>
+                switch (step.Direction)
+                {
+                    case MoveDirection.Up:
+                        <div class="step">
+
+                            <div class="step-card-grid">
+                                <div class="step-puzzle-element-num">@step.PieceNumber</div>                                  
+                                <span class="material-icons move-icon">
+                                    expand_less
+                                </span>
+                            </div>
+                        </div>
+                        break;
+                    case MoveDirection.Down:
+                        <div class="step">
+
+                            <div class="step-card-grid">
+                                <div class="step-puzzle-element-num">@step.PieceNumber</div>
+                                <span class="material-icons move-icon">
+                                    expand_more
+                                </span>
+                            </div>
+                        </div>
+                        break;
+                    case MoveDirection.Left:
+                        <div class="step">
+                            <div class="step-card-grid">
+                                <div class="step-puzzle-element-num">@step.PieceNumber</div>                                    
+                                <span class="material-icons move-icon">
+                                    chevron_left
+                                </span>
+                            </div>
+                        </div>
+                        break;
+                    case MoveDirection.Right:
+                        <div class="step">
+                            <div class="step-card-grid">
+                                <div class="step-puzzle-element-num">@step.PieceNumber</div>                                 
+                                <span class="material-icons move-icon">
+                                    chevron_right
+                                </span>
+                            </div>
+                        </div>
+                        break;
+                    case MoveDirection.None:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
             }
         }
-    }*@
+        else
+        {
+            <p>Nothing to show yet.</p>
+        }
+
+    </div>
+</div>
 
 
-</section>
+
+
 
 
 @code {
@@ -69,18 +127,19 @@
             new List<int>() { 7, 8, 0 }
         };
 
-    private static List<List<PuzzleElement>> puzzleMatrix = new List<List<PuzzleElement>>();
+    private static List<List<PuzzleElement>> puzzleMatrix;
     private Dictionary<int, Point> targetNumberPosition;
     private static Dictionary<int, PuzzleElement> puzzleList;
     private static int puzzleSize = 0;
     private string matrixData;
     public PuzzleSolver solver;
-    bool isSolving;
+    bool isSolving = false;
     bool validMatrix = false;
+    bool solutionReady = false;
 
-    public void StartSolving()
+    private async Task StartSolving()
     {
-        Console.WriteLine("DERP DERP PRESSSED");
+        puzzleMatrix = new List<List<PuzzleElement>>();
         puzzleList = new Dictionary<int, PuzzleElement>();
         List<string> rows = matrixData.Split(',').ToList();
         targetNumberPosition = GenTargetPositionList(SelectTargetMatrix());
@@ -100,13 +159,17 @@
             puzzleMatrix.Add(rowToAdd);
         }
 
+        solver = new PuzzleSolver(3, puzzleMatrix, puzzleList);
+
         validMatrix = true;
         StateHasChanged();
 
-        //isSolving = true;
-        //Task task = Task<bool>.Factory.StartNew(() => solver.Solve());
-        //task.Wait();
-        //isSolving = task.IsCompleted;
+        isSolving = true;
+        Task task = Task<bool>.Factory.StartNew(() => solver.Solve());
+        task.Wait();
+        isSolving = !task.IsCompleted;
+        solutionReady = true;
+        StateHasChanged();
     }
 
     public static Dictionary<int, Point> GenTargetPositionList(List<List<int>> templateMatrix)

@@ -48,3 +48,106 @@ a, .btn-link {
         right: 0.75rem;
         top: 0.5rem;
     }
+
+.puzzle-element {
+    display: flex;
+    flex: 0 32%;
+    height: 100px;
+    margin-bottom: 2%; /* (100-32*3)/2 */
+    justify-content: center;
+    align-items: center;
+    background: #353535;
+    font-size: 1rem;
+    color: #fff;
+}
+
+.puzzle-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-self: center;
+}
+
+.solver-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.puzzle-grid {
+    display: grid;
+    row-gap: 4px;
+    column-gap: 4px;
+    grid-template-columns: repeat(3, minmax(100px, 1fr));
+    grid-template-rows: repeat(3, minmax(100px, 1fr));
+}
+
+.root-grid {
+    display: grid;
+    flex-wrap: wrap;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    row-gap: 2%;
+}
+
+.output-grid {
+    grid-column: span 2 / auto;
+}
+
+.move-icon {
+    font-size: 42px !important;
+    color: #ab47bc;
+}
+
+.step-container {
+    display: flex;
+}
+
+
+.step {
+    display: inline-grid;
+    height: 25%;
+    width: 25%;
+    background: #f3e5f5;
+    font-size: 1rem;
+    color: #12005e;
+    border-radius: 10px;
+    align-items: center;
+    justify-items: center; /* adjusted */
+}
+
+
+    .step + .step {
+        margin-left: 2%;
+    }
+
+.step-card-grid {
+    display: grid;
+    flex-wrap: wrap;
+    grid-template-columns: repeat(2, auto);
+    margin-left: 0.8rem;
+}
+
+.step-direction-text {
+    justify-content: center;
+    align-items: center;
+    grid-column: 2;
+    text-align: center;
+}
+
+.grid-parent {
+    align-self: center;
+    justify-self: center;
+}
+
+p {
+    margin: 0px;
+    text-align: center;
+}
+
+.step-puzzle-element-num {
+    align-self: center;
+    justify-self: center;
+    grid-row: span 2 / auto;
+    font-size: 30px;
+}
