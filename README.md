@@ -6,7 +6,7 @@ The goal is to write an algorithm that automatically solved a 3x3 sliding puzzle
 This repo contains two VS 2019 projects. One contains a CLI solution and the other one is the GUI version build using Blazor. 
 
 ## Try it out
-The GUI version of this solution can be found [here](#http://nikolatotev-001-site1.ctempurl.com/).
+The GUI version of this solution can be found [here](http://nikolatotev-001-site1.ctempurl.com/).
 
 ## Program Elements
 
