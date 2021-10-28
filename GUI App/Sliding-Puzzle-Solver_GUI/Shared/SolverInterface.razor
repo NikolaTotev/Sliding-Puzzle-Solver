@@ -4,6 +4,16 @@
 <head>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
           rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Spicy+Rice&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap" rel="stylesheet">
 </head>
 <h3> 3x3 Auto Solver</h3>
 
@@ -26,7 +36,15 @@
             }
             else
             {
-                <p>Please enter a puzzle to solve</p>
+                for (int i = 0; i < 3; i++)
+                {
+                    for (int j = 0; j < 3; j++)
+                    {
+                        <div>
+                            <div class="placeholder-element">@(placeholderCharacters[i,j])</div>
+                        </div>
+                    }
+                }
             }
 
         </div>
@@ -35,10 +53,12 @@
 
     <div class="solver-controls">
         <p>Input the puzzle matrix in the format:</p>
-        <p>1 2 3, 4 5 6, 7 8 0</p>
+        <p class="matrix-example">1 2 3,4 5 6,7 8 0</p>
         <p>Where 0 indicates the empty spot in the puzzle.</p>
         <input id="matrixRowInput" type="text" @bind="matrixData" />
-        <input id="Button1" type="button" value="button" @onclick="@(() => StartSolving())" />
+        <input id="btn_Solve" class="solve-btn" type="button" value="Solve!" @onclick="@(() => StartSolving())" />
+        <div class="error"> <p>@(errorMessage)</p></div>
+
     </div>
 
 
@@ -47,10 +67,14 @@
 
         @if (isSolving)
         {
-            <p>Preparing solution...</p>
+            <p>Preparing solution Σ(-᷅_-᷄๑)</p>
         }
         else if (!isSolving && solutionReady)
         {
+            if (solver.Moves.Count == 0)
+            {
+                <p>Stop testing my program for faults, of course I check for puzzles that are already solved... (☞ﾟ∀ﾟ)☞</p>
+            }
             @foreach (Movable step in solver.Moves)
             {
                 switch (step.Direction)
@@ -59,7 +83,7 @@
                         <div class="step">
 
                             <div class="step-card-grid">
-                                <div class="step-puzzle-element-num">@step.PieceNumber</div>                                  
+                                <div class="step-puzzle-element-num">@step.PieceNumber</div>
                                 <span class="material-icons move-icon">
                                     expand_less
                                 </span>
@@ -80,7 +104,7 @@
                     case MoveDirection.Left:
                         <div class="step">
                             <div class="step-card-grid">
-                                <div class="step-puzzle-element-num">@step.PieceNumber</div>                                    
+                                <div class="step-puzzle-element-num">@step.PieceNumber</div>
                                 <span class="material-icons move-icon">
                                     chevron_left
                                 </span>
@@ -90,7 +114,7 @@
                     case MoveDirection.Right:
                         <div class="step">
                             <div class="step-card-grid">
-                                <div class="step-puzzle-element-num">@step.PieceNumber</div>                                 
+                                <div class="step-puzzle-element-num">@step.PieceNumber</div>
                                 <span class="material-icons move-icon">
                                     chevron_right
                                 </span>
@@ -105,9 +129,13 @@
 
             }
         }
+        else if (!isSolving && !solutionReady && validMatrix)
+        {
+            <div class="error"><p>Seems like this puzzle can't be solved in the allowed time limit! ʅ（◞‿◟）ʃ </p></div>
+        }
         else
         {
-            <p>Nothing to show yet.</p>
+            <p>Nothing to show yet! ¯\_(ツ)_/¯</p>
         }
 
     </div>
@@ -122,53 +150,128 @@
 
     private static List<List<int>> ThreeXThreeMatrix = new()
     {
-            new List<int>() { 1, 2, 3 },
-            new List<int>() { 4, 5, 6 },
-            new List<int>() { 7, 8, 0 }
-        };
+        new List<int>() { 1, 2, 3 },
+        new List<int>() { 4, 5, 6 },
+        new List<int>() { 7, 8, 0 }
+    };
+
+    private static string[,] placeholderCharacters = new string[3, 3]
+    {
+{ "*\\(^o^)/*", "（＾ν＾）", "( ^ω^ )" },
+{ "(*≧∀≦*)", "╰(*´︶`*)╯♡", "♪(๑ᴖ◡ᴖ๑)♪" },
+{ "o(^▽^)o", "＼(^ω^)／", "╰(*´︶`*)╯" }
+                    };
+
+    private string customErrorMessage = "HEY! Stop trying to break my program! (ง'̀-'́)ง ";
 
     private static List<List<PuzzleElement>> puzzleMatrix;
     private Dictionary<int, Point> targetNumberPosition;
     private static Dictionary<int, PuzzleElement> puzzleList;
     private static int puzzleSize = 0;
     private string matrixData;
+    private string errorMessage;
     public PuzzleSolver solver;
     bool isSolving = false;
     bool validMatrix = false;
     bool solutionReady = false;
+    int errorCounter = 0;
 
     private async Task StartSolving()
     {
+
+        errorMessage = string.Empty;
+        StateHasChanged();
+
+        if (String.IsNullOrWhiteSpace(matrixData))
+        {
+            errorMessage = "(c\" ತ,_ತ) Come on now, I can't solve an empty puzzle! ";
+            errorCounter++;
+            checkErrorCount();
+            StateHasChanged();
+            return;
+        }
+
+        if (matrixData.Contains(", "))
+        {
+            errorMessage = "Why are you trying to break my code! (ノಠ益ಠ)ノ彡┻━┻ \n Its \"3,4\" no spaces after the commas!!";
+            errorCounter++;
+            checkErrorCount();
+            StateHasChanged();
+            return;
+        }
+
+
+
         puzzleMatrix = new List<List<PuzzleElement>>();
         puzzleList = new Dictionary<int, PuzzleElement>();
         List<string> rows = matrixData.Split(',').ToList();
         targetNumberPosition = GenTargetPositionList(SelectTargetMatrix());
+
+        if (rows.Count < 3)
+        {
+            errorMessage = "(-᷅_-᷄๑) Go back to school, you can't count. I need 3 rows...";
+            errorCounter++;
+            checkErrorCount();
+            StateHasChanged();
+            return;
+        }
+
         for (int j = 0; j < 3; j++)
         {
-            List<int> numbers = rows[j].Split(' ').Select(int.Parse).ToList();
-            List<PuzzleElement> rowToAdd = new List<PuzzleElement>();
-
-            for (int i = 0; i < numbers.Count; i++)
+            try
             {
-                Point currentCoord = new Point(i, j);
-                PuzzleElement elementToAdd =
-                    new PuzzleElement(numbers[i], currentCoord, targetNumberPosition[numbers[i]]);
-                rowToAdd.Add(elementToAdd);
-                puzzleList.Add(numbers[i], elementToAdd);
+                List<int> numbers = rows[j].Split(' ').Select(int.Parse).ToList();
+                List<PuzzleElement> rowToAdd = new List<PuzzleElement>();
+                if (numbers.Count < 3)
+                {
+                    errorMessage = "（−＿−；）Um, can you count? I need 3 numbers per row...";
+                    errorCounter++;
+                    checkErrorCount();
+                    StateHasChanged();
+                    return;
+                }
+
+                for (int i = 0; i < numbers.Count; i++)
+                {
+                    Point currentCoord = new Point(i, j);
+
+                    PuzzleElement elementToAdd =
+                        new PuzzleElement(numbers[i], currentCoord, targetNumberPosition[numbers[i]]);
+                    rowToAdd.Add(elementToAdd);
+                    puzzleList.Add(numbers[i], elementToAdd);
+                }
+                puzzleMatrix.Add(rowToAdd);
             }
-            puzzleMatrix.Add(rowToAdd);
+            catch (FormatException)
+            {
+                errorMessage = "ಠ_ಠ You do know what numbers look like right?";
+                errorCounter++;
+                checkErrorCount();
+                StateHasChanged();
+                return;
+
+            }
+            catch (Exception)
+            {
+                errorMessage = "Whopsie, you gave my program a boo boo (◞‸◟)";
+                errorCounter++;
+                checkErrorCount();
+                StateHasChanged();
+                return;
+            }
         }
 
         solver = new PuzzleSolver(3, puzzleMatrix, puzzleList);
 
         validMatrix = true;
+        isSolving = true;
+
         StateHasChanged();
 
-        isSolving = true;
-        Task task = Task<bool>.Factory.StartNew(() => solver.Solve());
-        task.Wait();
-        isSolving = !task.IsCompleted;
-        solutionReady = true;
+        Task<bool> solverTask = solver.Solve();
+        solutionReady = await solverTask;
+        isSolving = !solverTask.IsCompleted;
+        errorCounter = 0;
         StateHasChanged();
     }
 
@@ -191,6 +294,14 @@
     public static List<List<int>> SelectTargetMatrix()
     {
         return ThreeXThreeMatrix;
+    }
+
+    void checkErrorCount()
+    {
+        if (errorCounter > 2)
+        {
+            errorMessage = customErrorMessage;
+        }
     }
 
 }

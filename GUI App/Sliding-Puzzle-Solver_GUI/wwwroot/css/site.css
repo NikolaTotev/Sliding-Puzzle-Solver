@@ -1,7 +1,9 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
 html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Montserrat', sans-serif;
+    text-align: left;
+    font-size: 1rem;
 }
 
 a, .btn-link {
@@ -49,22 +51,70 @@ a, .btn-link {
         top: 0.5rem;
     }
 
+h3 {
+    font-family: 'Spicy Rice', cursive;
+    font-size: 4rem;
+    color: #12005e;
+    animation-name: titleTextAnimation;
+    animation-duration: 42s;
+    animation-iteration-count: infinite;
+}
+
+@keyframes titleTextAnimation {
+    0% {
+        color: #12005e;
+    }
+
+    25% {
+        color: #ab47bc;
+    }
+
+    50% {
+        color: #e1bee7;
+    }
+
+    75% {
+        color: #ab47bc;
+    }
+
+    100% {
+        color: #12005e;
+    }
+}
+
 .puzzle-element {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
     display: flex;
     flex: 0 32%;
     height: 100px;
     margin-bottom: 2%; /* (100-32*3)/2 */
     justify-content: center;
     align-items: center;
-    background: #353535;
+    font-size: 2rem;
+    background: #f3e5f5;
+    color: #12005e;
+    border-radius: 10px;
+}
+
+.placeholder-element {
+    display: flex;
+    flex: 0 32%;
+    height: 100px;
+    margin-bottom: 2%; /* (100-32*3)/2 */
+    justify-content: center;
+    align-items: center;
+    background: #f3e5f5;
     font-size: 1rem;
-    color: #fff;
+    color: #12005e;
+    border-radius: 10px;
 }
 
 .puzzle-container {
     display: flex;
     flex-wrap: wrap;
     align-self: center;
+    justify-content: center;
 }
 
 .solver-container {
@@ -72,6 +122,10 @@ a, .btn-link {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+}
+
+.solver-controls {
+    text-align: left;
 }
 
 .puzzle-grid {
@@ -85,9 +139,10 @@ a, .btn-link {
 .root-grid {
     display: grid;
     flex-wrap: wrap;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, 20rem);
     grid-template-rows: repeat(2, 1fr);
     row-gap: 2%;
+    column-gap: 5%;
 }
 
 .output-grid {
@@ -101,25 +156,27 @@ a, .btn-link {
 
 .step-container {
     display: flex;
+    grid-column: span 2 / auto;
+    flex-wrap: wrap;
+    flex-direction: row;
+    
 }
 
+.step-container-grid {
+    
+}
 
 .step {
     display: inline-grid;
-    height: 25%;
-    width: 25%;
+    height: 24%;
     background: #f3e5f5;
     font-size: 1rem;
     color: #12005e;
     border-radius: 10px;
     align-items: center;
     justify-items: center; /* adjusted */
+    margin-right: 4.2px;
 }
-
-
-    .step + .step {
-        margin-left: 2%;
-    }
 
 .step-card-grid {
     display: grid;
@@ -142,12 +199,36 @@ a, .btn-link {
 
 p {
     margin: 0px;
-    text-align: center;
+    text-align: left;
 }
 
 .step-puzzle-element-num {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
     align-self: center;
     justify-self: center;
     grid-row: span 2 / auto;
     font-size: 30px;
+}
+
+.solve-btn {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+    color: #f3e5f5;
+    background-color: #12005e;
+    border-radius: 4px;
+    border: none;
+}
+
+.error {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    color: #ff1744;
+    font-size: 1rem;
+    width: 100%;
+    margin: 0;
+}
+
+.nav-icon {
+    margin-right: 4.2px; 
 }

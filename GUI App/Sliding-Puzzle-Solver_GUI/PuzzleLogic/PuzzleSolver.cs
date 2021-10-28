@@ -90,9 +90,13 @@ namespace Sliding_Puzzle_Solver_GUI.PuzzleLogic
         }
 
 
-        public bool Solve()
+        public async Task<bool> Solve()
         {
-            while (!m_IsSolved)
+            if (CalcHnCoef() == 0)
+            {
+                return true;
+            }
+            while (!m_IsSolved && m_CurrentThreshold < 50)
             {
                 Console.WriteLine(m_CurrentThreshold);
                 Search(0);
@@ -106,6 +110,8 @@ namespace Sliding_Puzzle_Solver_GUI.PuzzleLogic
         {
             List<Movable> movables = FindMovable();
             int[,] parentMatrix;
+
+            
             foreach (Movable movableElement in movables)
             {
 
