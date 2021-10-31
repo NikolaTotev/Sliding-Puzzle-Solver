@@ -144,7 +144,7 @@ namespace Sliding_Puzzle_Solver_CLI
             Console.WriteLine();
             Console.WriteLine("Moves:");
 
-
+            Console.WriteLine($"Number of steps: {solver.Moves.Count}");
             foreach (Movable rootConfigurationStep in solver.Moves)
             {
                 Console.WriteLine($"Move {rootConfigurationStep.PieceNumber} {rootConfigurationStep.Direction}");

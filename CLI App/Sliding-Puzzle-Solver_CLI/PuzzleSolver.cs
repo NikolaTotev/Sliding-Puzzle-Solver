@@ -12,7 +12,7 @@ namespace Sliding_Puzzle_Solver_CLI
         private int m_PuzzleSize;
         private List<List<PuzzleElement>> m_ConfigurationMatrix;
         private Dictionary<int, PuzzleElement> m_ConfigurationList;
-        
+
         public Stack<Movable> Moves
         {
             get;
@@ -76,7 +76,7 @@ namespace Sliding_Puzzle_Solver_CLI
                 //$"{element.Value.ElementNumber} -> hn = {element.Value.ManhattanDistance} || New total: {hnCoef}");
             }
 
-           return hnCoef;
+            return hnCoef;
         }
 
 
@@ -87,7 +87,7 @@ namespace Sliding_Puzzle_Solver_CLI
                 Console.WriteLine(m_CurrentThreshold);
                 Search(0);
                 m_CurrentThreshold += 2;
-                
+
             }
         }
 
@@ -97,9 +97,7 @@ namespace Sliding_Puzzle_Solver_CLI
             int[,] parentMatrix;
             foreach (Movable movableElement in movables)
             {
-
                 parentMatrix = SaveParentMatrix();
-
                 Move(false, movableElement);
 
                 if (WillLoop(parentMatrix))
@@ -109,19 +107,20 @@ namespace Sliding_Puzzle_Solver_CLI
                 else
                 {
                     int currentHnCoef = CalcHnCoef();
-                    
+
+                    if (currentHnCoef == 0)
+                    {
+                        m_IsSolved = true;
+                        Moves.Push(movableElement);
+                        Console.WriteLine("FOUND! Generating path...");
+                        return;
+                    }
+
                     if (currentHnCoef + currentDepth <= m_CurrentThreshold)
                     {
-                        if (currentHnCoef == 0)
-                        {
-                            m_IsSolved = true;
-                            Moves.Push(movableElement);
-                            return;
-                        }
 
-                        
-                        Search(currentDepth+1);
-                        
+                        Search(currentDepth + 1);
+
                         if (m_IsSolved)
                         {
                             Moves.Push(movableElement);
@@ -134,6 +133,8 @@ namespace Sliding_Puzzle_Solver_CLI
                         Move(true, movableElement);
                     }
                 }
+
+
             }
         }
 
@@ -145,9 +146,9 @@ namespace Sliding_Puzzle_Solver_CLI
             //Console.WriteLine("======= Finding movable =======");
             bool canMoveLeft = m_ConfigurationList[0].CurrentPosition.X >= 1;
             int number = m_ConfigurationList[0].ElementNumber;
-            bool canMoveRight = m_ConfigurationList[0].CurrentPosition.X < 2;
+            bool canMoveRight = m_ConfigurationList[0].CurrentPosition.X < m_PuzzleSize - 1;
             bool canMoveUp = m_ConfigurationList[0].CurrentPosition.Y >= 1;
-            bool canMoveDown = m_ConfigurationList[0].CurrentPosition.Y < 2;
+            bool canMoveDown = m_ConfigurationList[0].CurrentPosition.Y < m_PuzzleSize - 1;
 
             if (canMoveLeft)
             {
@@ -264,7 +265,7 @@ namespace Sliding_Puzzle_Solver_CLI
             }
         }
 
-        private int [,] SaveParentMatrix()
+        private int[,] SaveParentMatrix()
         {
             int[,] newParent = new int[m_PuzzleSize, m_PuzzleSize];
             for (int i = 0; i < m_ConfigurationMatrix.Count; i++)
@@ -279,8 +280,9 @@ namespace Sliding_Puzzle_Solver_CLI
             return newParent;
         }
 
-        bool WillLoop(int [,] m_ParentMatrix)
+        bool WillLoop(int[,] m_ParentMatrix)
         {
+
             for (int i = 0; i < m_ConfigurationMatrix.Count; i++)
             {
                 for (int j = 0; j < m_ConfigurationMatrix[i].Count; j++)
