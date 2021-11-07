@@ -18,50 +18,55 @@
 <h3> 3x3 Auto Solver</h3>
 
 <div class="root-grid">
+    <div class="puzzle-controls-grid">
 
-    <div class="puzzle-container">
-        <div class="puzzle-grid">
 
-            @if (validMatrix)
-            {
-                for (int i = 0; i < 3; i++)
+
+        <div class="puzzle-container">
+            <div class="puzzle-grid">
+
+                @if (validMatrix)
                 {
-                    for (int j = 0; j < 3; j++)
+                    for (int i = 0; i < 3; i++)
                     {
-                        <div>
-                            <div class="puzzle-element">@(puzzleMatrix[i][j].ElementNumber)</div>
-                        </div>
+                        for (int j = 0; j < 3; j++)
+                        {
+                            <div>
+                                <div class="puzzle-element">@(puzzleMatrix[i][j].ElementNumber)</div>
+                            </div>
+                        }
                     }
                 }
-            }
-            else
-            {
-                for (int i = 0; i < 3; i++)
+                else
                 {
-                    for (int j = 0; j < 3; j++)
+                    for (int i = 0; i < 3; i++)
                     {
-                        <div>
-                            <div class="placeholder-element">@(placeholderCharacters[i,j])</div>
-                        </div>
+                        for (int j = 0; j < 3; j++)
+                        {
+                            <div>
+                                <div class="placeholder-element">@(placeholderCharacters[i, j])</div>
+                            </div>
+                        }
                     }
                 }
-            }
+
+            </div>
+
+        </div>
+
+        <div class="solver-controls">
+            <p>Input the puzzle matrix in the format:</p>
+            <p class="matrix-example">1 2 3,4 5 6,7 8 0</p>
+            <p>Where 0 indicates the empty spot in the puzzle.</p>
+            <input id="matrixRowInput" type="text" @bind="matrixData" />
+            <input id="btn_Solve" class="solve-btn" type="button" value="Solve!" @onclick="@(() => StartSolving())" />
+            <div class="error">
+                <p>@(errorMessage)</p>
+            </div>
 
         </div>
 
     </div>
-
-    <div class="solver-controls">
-        <p>Input the puzzle matrix in the format:</p>
-        <p class="matrix-example">1 2 3,4 5 6,7 8 0</p>
-        <p>Where 0 indicates the empty spot in the puzzle.</p>
-        <input id="matrixRowInput" type="text" @bind="matrixData" />
-        <input id="btn_Solve" class="solve-btn" type="button" value="Solve!" @onclick="@(() => StartSolving())" />
-        <div class="error"> <p>@(errorMessage)</p></div>
-
-    </div>
-
-
 
     <div class="step-container">
 
@@ -131,7 +136,9 @@
         }
         else if (!isSolving && !solutionReady && validMatrix)
         {
-            <div class="error"><p>Seems like this puzzle can't be solved in the allowed time limit! ʅ（◞‿◟）ʃ </p></div>
+            <div class="error">
+                <p>Seems like this puzzle can't be solved in the allowed time limit! ʅ（◞‿◟）ʃ </p>
+            </div>
         }
         else
         {
@@ -150,17 +157,17 @@
 
     private static List<List<int>> ThreeXThreeMatrix = new()
     {
-        new List<int>() { 1, 2, 3 },
-        new List<int>() { 4, 5, 6 },
-        new List<int>() { 7, 8, 0 }
-    };
+            new List<int>() { 1, 2, 3 },
+            new List<int>() { 4, 5, 6 },
+            new List<int>() { 7, 8, 0 }
+        };
 
     private static string[,] placeholderCharacters = new string[3, 3]
     {
 { "*\\(^o^)/*", "（＾ν＾）", "( ^ω^ )" },
 { "(*≧∀≦*)", "╰(*´︶`*)╯♡", "♪(๑ᴖ◡ᴖ๑)♪" },
 { "o(^▽^)o", "＼(^ω^)／", "╰(*´︶`*)╯" }
-                    };
+                        };
 
     private string customErrorMessage = "HEY! Stop trying to break my program! (ง'̀-'́)ง ";
 

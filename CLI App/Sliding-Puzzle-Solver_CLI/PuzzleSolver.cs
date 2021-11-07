@@ -91,7 +91,7 @@ namespace Sliding_Puzzle_Solver_CLI
             }
         }
 
-        private void Search(int currentDepth)
+        private bool Search(int currentDepth)
         {
             List<Movable> movables = FindMovable();
             int[,] parentMatrix;
@@ -113,19 +113,17 @@ namespace Sliding_Puzzle_Solver_CLI
                         m_IsSolved = true;
                         Moves.Push(movableElement);
                         Console.WriteLine("FOUND! Generating path...");
-                        return;
+                        return true;
                     }
 
                     if (currentHnCoef + currentDepth <= m_CurrentThreshold)
                     {
-
-                        Search(currentDepth + 1);
-
-                        if (m_IsSolved)
+                        if (Search(currentDepth + 1))
                         {
                             Moves.Push(movableElement);
-                            return;
+                            return true;
                         }
+
                         Move(true, movableElement);
                     }
                     else
@@ -133,9 +131,8 @@ namespace Sliding_Puzzle_Solver_CLI
                         Move(true, movableElement);
                     }
                 }
-
-
             }
+            return false;
         }
 
         public List<Movable> FindMovable()
@@ -145,7 +142,6 @@ namespace Sliding_Puzzle_Solver_CLI
             //Console.WriteLine();
             //Console.WriteLine("======= Finding movable =======");
             bool canMoveLeft = m_ConfigurationList[0].CurrentPosition.X >= 1;
-            int number = m_ConfigurationList[0].ElementNumber;
             bool canMoveRight = m_ConfigurationList[0].CurrentPosition.X < m_PuzzleSize - 1;
             bool canMoveUp = m_ConfigurationList[0].CurrentPosition.Y >= 1;
             bool canMoveDown = m_ConfigurationList[0].CurrentPosition.Y < m_PuzzleSize - 1;

@@ -115,6 +115,7 @@ h3 {
     flex-wrap: wrap;
     align-self: center;
     justify-content: center;
+    padding: 10px;
 }
 
 .solver-container {
@@ -137,12 +138,17 @@ h3 {
 }
 
 .root-grid {
-    display: grid;
+    display: flex;
     flex-wrap: wrap;
     grid-template-columns: repeat(2, 20rem);
-    grid-template-rows: repeat(2, 1fr);
     row-gap: 2%;
     column-gap: 5%;
+}
+
+.puzzle-controls-grid {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
 }
 
 .output-grid {
